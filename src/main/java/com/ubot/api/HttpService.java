@@ -4,19 +4,18 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.message.BasicHttpResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -50,16 +49,22 @@ public class HttpService extends HttpServlet {
 			throws ServletException, IOException {
 		String json = request.getReader().lines().collect(Collectors.joining());
 		StringBuffer strUrl = new StringBuffer("http://172.16.45.135:8080/EaiHub/resCommon/getAd01");
-		CloseableHttpClient client = HttpClientBuilder.create().build();
-		HttpPost method = new HttpPost(strUrl.toString());
-		method.setHeader("Content-type", "application/json");
-		method.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-		ClassicHttpResponse  clientResponse = (ClassicHttpResponse) client.execute(method);
+		HttpPost post = new HttpPost(strUrl.toString());
+		post.setHeader("Content-type", "application/json");
+		
+		BasicCredentialsProvider provider = new BasicCredentialsProvider();
+		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("webrtc",
+				"webrtc".toCharArray());
+		provider.setCredentials(new AuthScope("172.16.45.135", 8080), credentials);
+
+		CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+		post.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+		ClassicHttpResponse clientResponse = (ClassicHttpResponse) client.execute(post);
 		if (clientResponse.getCode() == 200) {
 			try {
+				ObjectMapper mapper = new ObjectMapper();
 				HttpEntity entity = clientResponse.getEntity();
 				String responseString = EntityUtils.toString(entity, "UTF-8");
-				ObjectMapper mapper = new ObjectMapper();
 				ObjectNode result = mapper.createObjectNode();
 				Map<String, String> jsonResult = mapper.readValue(responseString, Map.class);
 				String rc2 = jsonResult.get("rc2");
@@ -70,6 +75,7 @@ public class HttpService extends HttpServlet {
 				} else {
 					result.put("message", "登入失敗");
 					result.put("code", "1");
+					result.put("reason", jsonResult.get("msg2"));
 				}
 				response.setContentType("application/json");
 				response.setCharacterEncoding("UTF-8");
@@ -79,6 +85,7 @@ public class HttpService extends HttpServlet {
 				e.printStackTrace();
 			}
 		} else {
+			System.out.println("response state: " + clientResponse.getCode());
 			response.getWriter().print("{\"message\": \"請求失敗\"}");
 		}
 	}
