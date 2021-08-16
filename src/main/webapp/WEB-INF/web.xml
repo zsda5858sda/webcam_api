@@ -28,4 +28,15 @@
   <servlet-mapping>
     <servlet-name>FileService</servlet-name>
     <url-pattern>/File</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>CustomerService</display-name>
+    <servlet-name>CustomerService</servlet-name>
+    <servlet-class>com.ubot.api.CustomerService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CustomerService</servlet-name>
+    <url-pattern>/Customer/*</url-pattern>
+  </servlet-mapping>
 </web-app>
