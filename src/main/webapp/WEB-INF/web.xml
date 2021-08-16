@@ -19,4 +19,13 @@
     <servlet-name>HttpService</servlet-name>
     <url-pattern>/getAD</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>FileService</display-name>
+    <servlet-name>FileService</servlet-name>
+    <servlet-class>com.ubot.api.FileService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>FileService</servlet-name>
+    <url-pattern>/File</url-pattern>
 </web-app>
