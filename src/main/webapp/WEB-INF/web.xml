@@ -39,4 +39,14 @@
     <servlet-name>CustomerService</servlet-name>
     <url-pattern>/Customer/*</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>LogService</display-name>
+    <servlet-name>LogService</servlet-name>
+    <servlet-class>com.ubot.api.LogService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LogService</servlet-name>
+    <url-pattern>/Log</url-pattern>
+  </servlet-mapping>
 </web-app>
