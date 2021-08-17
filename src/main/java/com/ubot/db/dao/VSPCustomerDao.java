@@ -6,17 +6,23 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.ubot.db.vo.VSPCustomer;
 
 public class VSPCustomerDao extends BaseDao {
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	public List<VSPCustomer> selectQuery(String sql) throws Exception {
 		List<VSPCustomer> result = new ArrayList<VSPCustomer>();
 		Connection conn = getConnection();
 		Statement stat = conn.createStatement();
 		ResultSet resultSet = stat.executeQuery(sql);
-
+		StringBuilder builder = new StringBuilder();
+		
 		while (resultSet.next()) {
 			VSPCustomer vspCustomer = new VSPCustomer();
 
@@ -28,17 +34,21 @@ public class VSPCustomerDao extends BaseDao {
 			vspCustomer.setCustomerPhone(customerPhone);
 			vspCustomer.setToken(token);
 
-			System.out.println("================================");
-			System.out.println(customerId);
-			System.out.println(customerPhone);
-			System.out.println(token);
-			System.out.println("================================");
+			builder.append("\n");
+			builder.append(customerPhone);
+			builder.append("  |  ");
+			builder.append(customerId);
+			builder.append("  |  ");
+			builder.append(token);
 
 			result.add(vspCustomer);
 		}
+		
+		System.out.println(builder.toString());
 		stat.close();
 		resultSet.close();
 		conn.close();
+		logger.info("客戶資料查詢");
 		return result;
 	}
 
@@ -51,6 +61,7 @@ public class VSPCustomerDao extends BaseDao {
 		ps.setString(2, vspCustomer.getCustomerPhone());
 		ps.setString(3, vspCustomer.getToken());
 
+		logger.info(ps.toString());
 		ps.execute();
 		ps.close();
 		conn.close();
@@ -58,7 +69,7 @@ public class VSPCustomerDao extends BaseDao {
 
 	public void updateQuery(VSPCustomer vspCustomer) throws Exception {
 		Connection conn = getConnection();
-		VSPCustomer entity = findById(vspCustomer.getCustomerPhone());
+		VSPCustomer entity = findById(vspCustomer.getCustomerPhone()).orElseThrow(() -> new Exception("此ID尚未註冊"));
 		if (vspCustomer.getToken() != null) {
 			entity.setToken(vspCustomer.getToken());
 		}
@@ -72,19 +83,23 @@ public class VSPCustomerDao extends BaseDao {
 		ps.setString(2, entity.getToken());
 		ps.setString(3, entity.getCustomerPhone());
 
+		logger.info(ps.toString());
 		ps.execute();
 		ps.close();
 		conn.close();
 	}
-	
-	public VSPCustomer findById(String id) throws Exception {
+
+	public Optional<VSPCustomer> findById(String id) throws Exception {
 		Connection conn = getConnection();
 		VSPCustomer vspCustomer = new VSPCustomer();
-		Statement stat = conn.createStatement();
-		ResultSet resultSet = stat.executeQuery(String.format("select * from vspcustomer where CUSTOMERPHONE = %s", id));
-
+		String sql = "select * from vspcustomer where CUSTOMERPHONE = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, id);
+		
+		ResultSet resultSet = ps.executeQuery();
+		StringBuilder builder = new StringBuilder();
+		
 		while (resultSet.next()) {
-
 			String customerId = resultSet.getString("CUSTOMERID");
 			String customerPhone = resultSet.getString("CUSTOMERPHONE");
 			String token = resultSet.getString("TOKEN");
@@ -93,16 +108,19 @@ public class VSPCustomerDao extends BaseDao {
 			vspCustomer.setCustomerPhone(customerPhone);
 			vspCustomer.setToken(token);
 
-			System.out.println("================================");
-			System.out.println(customerId);
-			System.out.println(customerPhone);
-			System.out.println(token);
-			System.out.println("================================");
-
+			builder.append("\n");
+			builder.append(customerPhone);
+			builder.append("  |  ");
+			builder.append(customerId);
+			builder.append("  |  ");
+			builder.append(token);
 		}
-		stat.close();
+		
+		System.out.println(builder.toString());
+		logger.info(ps.toString());
+		ps.close();
 		resultSet.close();
 		conn.close();
-		return vspCustomer;
+		return vspCustomer.getCustomerPhone() == null ? Optional.empty() : Optional.of(vspCustomer);
 	}
 }

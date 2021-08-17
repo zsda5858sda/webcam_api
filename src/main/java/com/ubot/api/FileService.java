@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class FileService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final VSPFileDao vspFileDao;
+	private final ObjectMapper mapper;
 
 	/**
 	 * Default constructor.
@@ -28,6 +29,7 @@ public class FileService extends HttpServlet {
 	public FileService() {
 		this.vspFileDao = new VSPFileDao();
 		// TODO Auto-generated constructor stub
+		this.mapper = new ObjectMapper();
 	}
 
 	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,7 +42,6 @@ public class FileService extends HttpServlet {
 
 	protected void doPatch(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode result = mapper.createObjectNode();
 		try {
 			String json = request.getReader().lines().collect(Collectors.joining());
@@ -67,7 +68,6 @@ public class FileService extends HttpServlet {
 			throws ServletException, IOException {
 		
 		List<VSPFile> vspFileList = new ArrayList<VSPFile>();
-		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode result = mapper.createObjectNode();
 		try {
 			vspFileList = vspFileDao.selectQuery("select * from vspfile;");
@@ -89,7 +89,6 @@ public class FileService extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode result = mapper.createObjectNode();
 		try {
 			String json = request.getReader().lines().collect(Collectors.joining());
