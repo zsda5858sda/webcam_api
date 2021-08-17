@@ -1,13 +1,10 @@
 package com.ubot.db.vo;
 
-import java.time.LocalDateTime;
-
 public class Log {
 	private String userId;
 	private String userType;
-	private LocalDateTime createDatetime;
+	private String createDatetime;
 	private String action;
-	private String customerId;
 	private String ip;
 
 	public String getUserId() {
@@ -26,11 +23,11 @@ public class Log {
 		this.userType = userType;
 	}
 
-	public LocalDateTime getCreateDatetime() {
+	public String getCreateDatetime() {
 		return createDatetime;
 	}
 
-	public void setCreateDatetime(LocalDateTime createDatetime) {
+	public void setCreateDatetime(String createDatetime) {
 		this.createDatetime = createDatetime;
 	}
 
@@ -40,14 +37,6 @@ public class Log {
 
 	public void setAction(String action) {
 		this.action = action;
-	}
-
-	public String getCustomerId() {
-		return customerId;
-	}
-
-	public void setCustomerId(String customerId) {
-		this.customerId = customerId;
 	}
 
 	public String getIp() {

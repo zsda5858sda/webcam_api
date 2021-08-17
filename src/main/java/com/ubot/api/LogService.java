@@ -3,6 +3,7 @@ package com.ubot.api;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +37,7 @@ public class LogService extends HttpServlet {
 		Log log = mapper.readValue(json, Log.class);
 		String message = "";
 		try {
-			log.setCreateDatetime(LocalDateTime.now());
+			log.setCreateDatetime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS")));
 			logDao.insertQuery(log);
 			message = "新增log成功";
 			logger.info(message);
