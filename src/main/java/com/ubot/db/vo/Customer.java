@@ -1,6 +1,6 @@
 package com.ubot.db.vo;
 
-public class VSPCustomer {
+public class Customer {
 	private String customerId;
 	private String customerPhone;
 	private String token;

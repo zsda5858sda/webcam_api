@@ -11,28 +11,28 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.ubot.db.vo.VSPCustomer;
+import com.ubot.db.vo.Customer;
 
-public class VSPCustomerDao extends BaseDao {
+public class CustomerDao extends BaseDao {
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
-	public List<VSPCustomer> selectQuery(String sql) throws Exception {
-		List<VSPCustomer> result = new ArrayList<VSPCustomer>();
+	public List<Customer> selectQuery(String sql) throws Exception {
+		List<Customer> result = new ArrayList<Customer>();
 		Connection conn = getConnection();
 		Statement stat = conn.createStatement();
 		ResultSet resultSet = stat.executeQuery(sql);
 		StringBuilder builder = new StringBuilder();
 		
 		while (resultSet.next()) {
-			VSPCustomer vspCustomer = new VSPCustomer();
+			Customer customer = new Customer();
 
 			String customerId = resultSet.getString("CUSTOMERID");
 			String customerPhone = resultSet.getString("CUSTOMERPHONE");
 			String token = resultSet.getString("TOKEN");
 
-			vspCustomer.setCustomerId(customerId);
-			vspCustomer.setCustomerPhone(customerPhone);
-			vspCustomer.setToken(token);
+			customer.setCustomerId(customerId);
+			customer.setCustomerPhone(customerPhone);
+			customer.setToken(token);
 
 			builder.append("\n");
 			builder.append(customerPhone);
@@ -41,7 +41,7 @@ public class VSPCustomerDao extends BaseDao {
 			builder.append("  |  ");
 			builder.append(token);
 
-			result.add(vspCustomer);
+			result.add(customer);
 		}
 		
 		System.out.println(builder.toString());
@@ -52,14 +52,14 @@ public class VSPCustomerDao extends BaseDao {
 		return result;
 	}
 
-	public void insertQuery(VSPCustomer vspCustomer) throws Exception {
+	public void insertQuery(Customer customer) throws Exception {
 		Connection conn = getConnection();
 		String sql = "insert into vspcustomer(CUSTOMERID, CUSTOMERPHONE, TOKEN) values(?,?,?)";
 		PreparedStatement ps = conn.prepareStatement(sql);
 
-		ps.setString(1, vspCustomer.getCustomerId());
-		ps.setString(2, vspCustomer.getCustomerPhone());
-		ps.setString(3, vspCustomer.getToken());
+		ps.setString(1, customer.getCustomerId());
+		ps.setString(2, customer.getCustomerPhone());
+		ps.setString(3, customer.getToken());
 
 		logger.info(ps.toString());
 		ps.execute();
@@ -67,14 +67,14 @@ public class VSPCustomerDao extends BaseDao {
 		conn.close();
 	}
 
-	public void updateQuery(VSPCustomer vspCustomer) throws Exception {
+	public void updateQuery(Customer customer) throws Exception {
 		Connection conn = getConnection();
-		VSPCustomer entity = findById(vspCustomer.getCustomerPhone()).orElseThrow(() -> new Exception("此ID尚未註冊"));
-		if (vspCustomer.getToken() != null) {
-			entity.setToken(vspCustomer.getToken());
+		Customer entity = findById(customer.getCustomerPhone()).orElseThrow(() -> new Exception("此ID尚未註冊"));
+		if (customer.getToken() != null) {
+			entity.setToken(customer.getToken());
 		}
-		if (vspCustomer.getCustomerId() != null) {
-			entity.setCustomerId(vspCustomer.getCustomerId());
+		if (customer.getCustomerId() != null) {
+			entity.setCustomerId(customer.getCustomerId());
 		}
 		String sql = "update vspcustomer set CUSTOMERID = ?, TOKEN = ? where CUSTOMERPHONE = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
@@ -89,9 +89,9 @@ public class VSPCustomerDao extends BaseDao {
 		conn.close();
 	}
 
-	public Optional<VSPCustomer> findById(String id) throws Exception {
+	public Optional<Customer> findById(String id) throws Exception {
 		Connection conn = getConnection();
-		VSPCustomer vspCustomer = new VSPCustomer();
+		Customer customer = new Customer();
 		String sql = "select * from vspcustomer where CUSTOMERPHONE = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, id);
@@ -104,9 +104,9 @@ public class VSPCustomerDao extends BaseDao {
 			String customerPhone = resultSet.getString("CUSTOMERPHONE");
 			String token = resultSet.getString("TOKEN");
 
-			vspCustomer.setCustomerId(customerId);
-			vspCustomer.setCustomerPhone(customerPhone);
-			vspCustomer.setToken(token);
+			customer.setCustomerId(customerId);
+			customer.setCustomerPhone(customerPhone);
+			customer.setToken(token);
 
 			builder.append("\n");
 			builder.append(customerPhone);
@@ -121,6 +121,6 @@ public class VSPCustomerDao extends BaseDao {
 		ps.close();
 		resultSet.close();
 		conn.close();
-		return vspCustomer.getCustomerPhone() == null ? Optional.empty() : Optional.of(vspCustomer);
+		return customer.getCustomerPhone() == null ? Optional.empty() : Optional.of(customer);
 	}
 }
