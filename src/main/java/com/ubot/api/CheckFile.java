@@ -33,8 +33,8 @@ public class CheckFile extends Thread {
 	public void run() {
 		try {
 			while (true) {
-				String dirName = "/Users/yangzhelun/Desktop/uploadFile";
-				String zipName = "/Users/yangzhelun/Desktop/zipFile/";
+				String dirName = "/home/petersha/uploadFile";
+				String zipName = "/home/petersha/zipFile/";
 				List filePaths = new ArrayList();
 				Files.list(new File(dirName).toPath()).forEach(path -> {
 					filePaths.add(path);

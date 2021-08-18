@@ -22,11 +22,8 @@ public class UploadServlet extends HttpServlet {
     /* Receive file uploaded to the Servlet from the HTML5 form */
     Part filePart = request.getPart("file");
     String fileName = filePart.getSubmittedFileName();
-    String folderName = "/";
-	for (int i = 0; i < 18; i++) {
-		folderName += fileName.charAt(i);
-	}
-	Path folderPath = Paths.get("/Users/yangzhelun/Desktop/uploadFile/" + folderName);
+    String folderName = fileName.split("-")[0]+"-"+fileName.split("-")[1];
+	Path folderPath = Paths.get("/home/petersha/uploadFile/" + folderName);
 	try {
 		Files.createDirectory(folderPath);
 	} catch (IOException e) {

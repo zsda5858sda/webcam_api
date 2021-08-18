@@ -24,11 +24,8 @@ public class UploadTxtServelet extends HttpServlet {
     request.setAttribute("fileName", fileName);
     String content = request.getParameter("content");
     request.setAttribute("content", content);   // 設定請求屬性
-    String folderName = "/";
-	for (int i = 0; i < 18; i++) {
-		folderName += fileName.charAt(i);
-	}
-	Path folderPath = Paths.get("/Users/yangzhelun/Desktop/uploadFile/" + folderName);
+    String folderName = fileName.split("-")[0]+"-"+fileName.split("-")[1];
+	Path folderPath = Paths.get("/home/petersha/uploadFile/" + folderName);
 	try {
 		Files.createDirectory(folderPath);
 	} catch (IOException e) {
