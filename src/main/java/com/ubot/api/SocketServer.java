@@ -1,7 +1,9 @@
 package com.ubot.api;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.RoundingMode;
@@ -28,6 +30,9 @@ class SocketServer extends Thread {
 		int current = 0;
 		DataInputStream dis;
 		FileOutputStream fos;
+		
+		FileInputStream fis;
+		DataOutputStream dos;
 		try {
 			dis = new DataInputStream(s.getInputStream());
 			String fileName = dis.readUTF();
@@ -44,6 +49,28 @@ class SocketServer extends Thread {
 				}
 				System.out.println("======== 檔案接收成功 [File Name：" + fileName + "] [Size：" + getFormatFileSize(fileLength)
 						+ "] ========");
+				fis = new FileInputStream(client);
+				dos = new DataOutputStream(s.getOutputStream());
+				dos.writeUTF(client.getName());
+				dos.flush();
+				dos.writeLong(client.length());
+				dos.flush();
+				System.out.println("======== 開始傳輸檔案 ========");
+				byte[] dbFileBytes = new byte[(int) client.length()];
+				int dbFileLength = 0;
+				long progress = 0;
+				while ((length = fis.read(dbFileBytes, 0, dbFileBytes.length)) != -1) {
+					dos.write(dbFileBytes, 0, dbFileLength);
+					dos.flush();
+					progress = dbFileLength;
+					System.out.print("| " + (100 * progress / client.length()) + "% |");
+				}
+				
+				System.out.println();
+				System.out.println("======== 檔案傳輸成功 ========");
+				
+				fis.close();
+				dos.close();
 				dis.close();
 				fos.close();
 			}
