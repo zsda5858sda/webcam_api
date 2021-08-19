@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -80,6 +82,8 @@ public class UploadServlet extends HttpServlet {
 			while (fin.available() != 0) {
 				fout.write(buffer, 0, fin.read(buffer));
 			}
+			fin.close();
+			fout.close();
 			String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS"));
 			message = myObj.getAbsolutePath().toString()+"新增於" + time;
 			logger.info(message);

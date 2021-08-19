@@ -38,12 +38,19 @@ public class ClientThreadCode extends Thread {
 				}
 				System.out.println();
 				System.out.println("======== 檔案傳輸成功 ========");
-				fis.close();
-				dos.close();
-				s.close();
+//				fis.close();
+//				dos.close();
+//				fis = null;
+//				dos = null;
 			} else {
 				System.out.println("file not exists");
 			}
+			fis.close();
+			dos.close();
+			fis = null;
+			dos = null;
+			s.close();
+			s = null;
 		} catch (Exception e) {
 			System.out.println("Error occur :" + e);
 		}

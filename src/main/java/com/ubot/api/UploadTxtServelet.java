@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,6 +64,15 @@ public class UploadTxtServelet extends HttpServlet {
 			System.out.println(e);
 		}
 
+		String name = "/home/petersha/uploadFile/" + folderName;
+		List fileCount = new ArrayList();
+		Files.list(new File(name).toPath()).forEach(path -> {
+			if(path.toString().endsWith("webm")) {
+				File deleteFile = new File(path.toString());
+				deleteFile.delete();
+			}
+		});
+		
 		File myObj = new File(folderPath + "/" + fileName);
 
 		if (myObj.createNewFile()) {

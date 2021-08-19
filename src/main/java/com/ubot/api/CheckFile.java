@@ -42,7 +42,6 @@ public class CheckFile extends Thread {
 					String name = filePaths.get(i1).toString();
 					List fileCount = new ArrayList();
 					Files.list(new File(name).toPath()).forEach(path -> {
-						System.out.println(name);
 						fileCount.add(path);
 					});
 					if (fileCount.size() >= 8) {
