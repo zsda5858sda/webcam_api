@@ -54,6 +54,6 @@
         <param-value>/contextInit</param-value>
   </context-param>
   <listener>
-        <listener-class>com.ubot.api.ContextInitListener</listener-class>
+	  <listener-class>com.ubot.api.ContextInitListener</listener-class>
   </listener>
 </web-app>

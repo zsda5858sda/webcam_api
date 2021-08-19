@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-
 public class CheckFile extends Thread {
 	public CheckFile() {
 	}
@@ -39,9 +38,6 @@ public class CheckFile extends Thread {
 				Files.list(new File(dirName).toPath()).forEach(path -> {
 					filePaths.add(path);
 				});
-				if (filePaths.size() == 1) {
-					System.out.println("目前資料夾為空的，不能檢查");
-				}
 				for (int i1 = 1; i1 < filePaths.size(); i1++) {
 					String name = filePaths.get(i1).toString();
 					List fileCount = new ArrayList();
@@ -72,13 +68,13 @@ public class CheckFile extends Thread {
 						} catch (final IOException e) {
 						}
 						ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-						Future future = executor.submit(new  ClientThreadCode(uploadFile));
-						executor.schedule(new Runnable(){
-						    public void run(){
-						        future.cancel(true);
-						        System.out.println("上傳終止");
-						    }
-						}, 30000, TimeUnit.MILLISECONDS); //設置上傳時數限制，若超出則強致中斷
+						Future future = executor.submit(new ClientThreadCode(uploadFile));
+						executor.schedule(new Runnable() {
+							public void run() {
+								future.cancel(true);
+								System.out.println("上傳終止");
+							}
+						}, 30000, TimeUnit.MILLISECONDS); // 設置上傳時數限制，若超出則強致中斷
 						executor.shutdown();
 						new CheckFile().join();
 						File f = new File(name); // file to be delete
@@ -123,7 +119,6 @@ public class CheckFile extends Thread {
 								e.printStackTrace();
 							}
 						}
-						System.out.println(name + "還不能上傳");
 					}
 					fileCount.clear();
 				}
