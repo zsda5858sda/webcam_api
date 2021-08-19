@@ -18,7 +18,7 @@ public class ClientThreadCode extends Thread {
 	public void run() {
 		try {
 			System.out.println("upload started");
-			Socket s = new Socket("172.16.45.245", 8000);
+			Socket s = new Socket("172.16.45.245", 5050);
 			if (clientFile.exists()) {
 				fis = new FileInputStream(clientFile);
 				dos = new DataOutputStream(s.getOutputStream());
