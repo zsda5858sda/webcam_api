@@ -36,21 +36,21 @@ public class CheckFile extends Thread {
 				String zipName = "/home/petersha/zipFile/";
 				List filePaths = new ArrayList();
 				Files.list(new File(dirName).toPath()).forEach(path -> {
-					filePaths.add(path);
+					filePaths.add(path);	  //走訪uploadFile資料夾並將裡面的檔案存放到arrayList
 				});
-				for (int i1 = 1; i1 < filePaths.size(); i1++) {
-					String name = filePaths.get(i1).toString();
+				for (int i1 = 1; i1 < filePaths.size(); i1++) {    //取出arrarList裡的檔案並逐一檢查是否到達上傳標準
+					String webcamFolderName = filePaths.get(i1).toString();
 					List fileCount = new ArrayList();
-					Files.list(new File(name).toPath()).forEach(path -> {
-						fileCount.add(path);
+					Files.list(new File(webcamFolderName).toPath()).forEach(path -> {
+						fileCount.add(path);  
 					});
 					if (fileCount.size() >= 8) {
-						String newFileName = name.split("uploadFile/")[1];
-						Path sourceFolderPath = Paths.get(name);
+						String newFileName = webcamFolderName.split("uploadFile/")[1];
+						Path sourceFolderPath = Paths.get(webcamFolderName);
 						Path zipPath = Paths.get(zipName + newFileName + ".zip");
-						System.out.println(name + "可以上傳摟");
+						System.out.println(webcamFolderName + "可以上傳摟");
 						ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath.toFile()));
-						Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<Path>() {
+						Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<Path>() { //將要上傳的資料夾壓縮
 							public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 								zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(file).toString()));
 								Files.copy(file, zos);
@@ -76,16 +76,18 @@ public class CheckFile extends Thread {
 						}, 30000, TimeUnit.MILLISECONDS); // 設置上傳時數限制，若超出則強致中斷
 						executor.shutdown();
 						new CheckFile().join();
-						File f = new File(name); // file to be delete
-						String[] entries = f.list();
+						File folderToBeDelete = new File(webcamFolderName); 
+						File zipToBeDelete = new File("/home/petersha/zipFile");// file to be delete
+						String[] entries = folderToBeDelete.list();
 						for (String s : entries) {
-							File currentFile = new File(f.getPath(), s);
+							File currentFile = new File(folderToBeDelete.getPath(), s);
 							currentFile.delete(); // 開始刪除檔案
 						}
 						try {
-							if (f.delete()) // returns Boolean value
+							if (folderToBeDelete.delete() && zipToBeDelete.delete()) // returns Boolean value
 							{
-								System.out.println(f.getName() + " deleted"); // getting and printing the file name
+								System.out.println(folderToBeDelete.getName() + " deleted"); // getting and printing the file name
+								System.out.println(zipToBeDelete.getName() + " deleted"); // getting and printing the file name
 							} else {
 								System.out.println("failed");
 							}
@@ -94,7 +96,7 @@ public class CheckFile extends Thread {
 						}
 
 					} else {
-						File myfile = new File(name);
+						File myfile = new File(webcamFolderName);
 						Path path = myfile.toPath();
 						BasicFileAttributes fatr = Files.readAttributes(path, BasicFileAttributes.class);
 						Clock clock = Clock.systemUTC();

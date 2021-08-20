@@ -41,16 +41,15 @@ public class UploadServlet extends HttpServlet {
 		Part filePart = request.getPart("file");
 		ObjectNode result = mapper.createObjectNode();
 		String fileName = filePart.getSubmittedFileName();
-		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] +"-"+ fileName.split("-")[2];
+		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[2];
 		Path folderPath = Paths.get("/home/petersha/uploadFile/" + folderName);
 		File file = new File("/home/petersha/uploadFile");
 		String message = "";
-		
+
 		boolean exists = file.exists();
-		if (exists == true)
-		{
+		if (exists == true) {
 			file.setExecutable(true);
-			file.setReadable(true);									//獲取資料夾權限
+			file.setReadable(true); // 獲取資料夾權限
 			file.setWritable(true);
 
 			System.out.println("File permissions changed.");
@@ -58,21 +57,25 @@ public class UploadServlet extends HttpServlet {
 			System.out.println("Readable: " + file.canRead());
 			System.out.println("Writable: " + file.canWrite());
 		}
-		
+
 		try {
 			Files.createDirectory(folderPath);
-		} catch (FileAlreadyExistsException e ) {
+		} catch (FileAlreadyExistsException e) {
 			System.out.println(e);
 		}
 		String finalFileName = "";
-		if(fileName.endsWith("webm")) {
-			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3]+"-"+fileName.split("-")[4];
+		if (fileName.endsWith("webm") && fileName.split("-").length == 6) {
+			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3] + "-"
+					+ fileName.split("-")[4] + "-" + fileName.split("-")[5];
+		} else if (fileName.endsWith("webm") && fileName.split("-").length == 5) {
+			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3] + "-"
+					+ fileName.split("-")[4];
 		} else {
-			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3];
+			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3];
 		}
-		
+
 		File myObj = new File(folderPath + "/" + finalFileName);
-		
+
 		if (myObj.createNewFile()) {
 			System.out.println("File created: " + myObj.getName());
 		} else {
@@ -91,7 +94,7 @@ public class UploadServlet extends HttpServlet {
 			fin.close();
 			fout.close();
 			String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS"));
-			message = myObj.getAbsolutePath().toString()+"新增於" + time;
+			message = myObj.getAbsolutePath().toString() + "新增於" + time;
 			logger.info(message);
 			result.put("message", message);
 			result.put("code", 0);

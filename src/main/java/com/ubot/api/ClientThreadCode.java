@@ -4,6 +4,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ClientThreadCode extends Thread {
 	File clientFile;
@@ -38,13 +40,10 @@ public class ClientThreadCode extends Thread {
 				}
 				System.out.println();
 				System.out.println("======== 檔案傳輸成功 ========");
-//				fis.close();
-//				dos.close();
-//				fis = null;
-//				dos = null;
 			} else {
 				System.out.println("file not exists");
 			}
+			clientFile.delete();
 			fis.close();
 			dos.close();
 			fis = null;
