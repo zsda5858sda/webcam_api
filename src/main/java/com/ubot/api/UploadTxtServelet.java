@@ -42,7 +42,9 @@ public class UploadTxtServelet extends HttpServlet {
 		request.setAttribute("fileName", fileName);
 		String content = request.getParameter("content");
 		request.setAttribute("content", content); // 設定請求屬性
-		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1];
+		String test = fileName.split("-")[3];
+		System.out.println(test);
+		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-"+fileName.split("-")[2];
 		Path folderPath = Paths.get("/home/petersha/uploadFile/" + folderName);
 		File file = new File("/home/petersha/uploadFile");
 		boolean exists = file.exists();
@@ -73,7 +75,14 @@ public class UploadTxtServelet extends HttpServlet {
 			}
 		});
 		
-		File myObj = new File(folderPath + "/" + fileName);
+		String finalFileName = "";
+		if(fileName.endsWith("webm")) {
+			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3]+"-"+fileName.split("-")[4];
+		} else {
+			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3];
+		}
+		
+		File myObj = new File(folderPath + "/" + finalFileName);
 
 		if (myObj.createNewFile()) {
 			System.out.println("File created: " + myObj.getName());
@@ -88,7 +97,7 @@ public class UploadTxtServelet extends HttpServlet {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(myObj));
 			writer.write(content); // 寫入檔案
 			writer.close();
-			String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS"));
+			String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-SS"));
 			message = myObj.getAbsolutePath().toString() + "新增於" + time;
 			logger.info(message);
 			result.put("message", message);

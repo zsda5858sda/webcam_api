@@ -41,7 +41,7 @@ public class UploadServlet extends HttpServlet {
 		Part filePart = request.getPart("file");
 		ObjectNode result = mapper.createObjectNode();
 		String fileName = filePart.getSubmittedFileName();
-		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1];
+		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] +"-"+ fileName.split("-")[2];
 		Path folderPath = Paths.get("/home/petersha/uploadFile/" + folderName);
 		File file = new File("/home/petersha/uploadFile");
 		String message = "";
@@ -64,8 +64,14 @@ public class UploadServlet extends HttpServlet {
 		} catch (FileAlreadyExistsException e ) {
 			System.out.println(e);
 		}
+		String finalFileName = "";
+		if(fileName.endsWith("webm")) {
+			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3]+"-"+fileName.split("-")[4];
+		} else {
+			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3];
+		}
 		
-		File myObj = new File(folderPath + "/" + fileName);
+		File myObj = new File(folderPath + "/" + finalFileName);
 		
 		if (myObj.createNewFile()) {
 			System.out.println("File created: " + myObj.getName());
