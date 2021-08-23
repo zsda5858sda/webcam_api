@@ -1,35 +1,38 @@
 package com.ubot.api;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.apache.hc.client5.http.HttpHostConnectException;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.json.JSONObject;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ubot.db.vo.EaiVO;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.Suspended;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-public class HttpService extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@Path("")
+public class HttpService {
 	private final ObjectMapper mapper;
 	private final Logger logger;
 
@@ -38,83 +41,87 @@ public class HttpService extends HttpServlet {
 		this.logger = LogManager.getLogger(this.getClass());
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		logger.info("infohelloworld");
-		response.getWriter().append("hello world");
+	@GET
+	@Produces("application/json")
+	public String hello() {
+		return "{\"result\": \"helloworld\"}";
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@POST
+	@Path("/getAD")
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public void getAD(@Suspended final AsyncResponse asyncResponse, String requestJson)
+			throws JsonMappingException, JsonProcessingException {
 		ObjectNode result = mapper.createObjectNode();
-		String json = request.getReader().lines().collect(Collectors.joining());
-		logger.info(json);
 
-		String message = "AD驗證登入成功";
+		EaiVO eaiVO = mapper.readValue(requestJson, EaiVO.class);
+		logger.info(requestJson);
+
+		String message = "%s AD驗證登入成功";
 		String errMessage = "";
 		StringBuffer errMessageBuffer = new StringBuffer("AD驗證登入失敗, 原因: ");
-		try {
-			ClassicHttpResponse clientResponse = sendToAdHub(json);
-			Thread.sleep(100);
-			if (clientResponse.getCode() == 200) {
-				try {
-					HttpEntity entity = clientResponse.getEntity();
-					String responseString = EntityUtils.toString(entity, "UTF-8");
-					Map<String, String> jsonResult = mapper.readValue(responseString, Map.class);
-					String rc2 = jsonResult.get("rc2");
+		long startTime = System.currentTimeMillis();
+		final long endTime = startTime + 50000;
+		Timer timer = new Timer();
 
-					if (rc2.equals("M000")) {
-						logger.info(message);
-						result.put("message", message);
-						result.put("code", "0");
-					} else {
-						errMessage = errMessageBuffer.append(String.format("%s", jsonResult.get("msg2"))).toString();
-						logger.error(errMessage);
-						result.put("message", errMessage);
-						result.put("code", "1");
-						result.put("reason", jsonResult.get("msg2"));
-					}
-
-				} catch (ParseException | IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else {
-				errMessage = errMessageBuffer.append(String.format("http status code %d", clientResponse.getCode()))
-						.toString();
-
-				logger.error(errMessage);
-				result.put("code", 1);
-				result.put("message", errMessage);
-
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				JSONObject json = new JSONObject();
+				String errMessage = "AD驗證登入失敗, 原因: 連線超時";
+				json.put("message", errMessage);
+				json.put("code", "1");
+				asyncResponse.resume(Response.status(200).entity(json.toString()).build());
+				timer.cancel();
 			}
-		} catch (HttpHostConnectException | InterruptedException e) {
-			errMessage = errMessageBuffer.append(String.format("%s", e.getMessage())).toString();
+		}, new Date(endTime));
+		Response clientResponse = sendToAdHub(eaiVO);
 
-			logger.error(errMessage);
-			result.put("code", 1);
-			result.put("message", errMessage);
-			e.printStackTrace();
+		if (clientResponse.getStatus() == 200) {
+			String responseString = clientResponse.readEntity(String.class);
+			JSONObject jsonResult = new JSONObject(responseString);
+			String rc2 = jsonResult.getString("rc2");
+			message = String.format(message,
+					jsonResult.getJSONObject("result").getJSONObject("data").getString("loginID"));
+			if (rc2.equals("M000")) {
+				logger.info(message);
+				result.put("message", message);
+				result.put("code", "0");
+			} else {
+				errMessage = errMessageBuffer.append(String.format("%s", jsonResult.get("msg2"))).toString();
+				setErrResult(result, errMessage);
+			}
+
+		} else {
+			errMessage = errMessageBuffer.append(String.format("http status code %d", clientResponse.getStatus()))
+					.toString();
+			setErrResult(result, errMessage);
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		asyncResponse.resume(Response.status(200).entity(mapper.writeValueAsString(result)).build());
+		timer.cancel();
 	}
 
 	// 發送至AD之設定
-	private ClassicHttpResponse sendToAdHub(String entity) throws IOException {
+	private Response sendToAdHub(EaiVO entity) {
 
-		StringBuffer strUrl = new StringBuffer("http://172.16.45.135:8080/EaiHub/resCommon/getAd01");
-		HttpPost post = new HttpPost(strUrl.toString());
-		post.setHeader("Content-type", "application/json");
+		ClientConfig clientConfig = new ClientConfig();
 
-		BasicCredentialsProvider provider = new BasicCredentialsProvider();
-		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("webrtc", "webrtc".toCharArray());
-		provider.setCredentials(new AuthScope("172.16.45.135", 8080), credentials);
+		HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("webrtc", "webrtc");
+		clientConfig.register(feature);
 
-		CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
-		post.setEntity(new StringEntity(entity, ContentType.APPLICATION_JSON));
-		return (ClassicHttpResponse) client.execute(post);
+		Client client = ClientBuilder.newClient(clientConfig);
+		WebTarget webTarget = client.target("http://172.16.45.135:8080/EaiHub/resCommon/getAd01");
+
+		Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+		Response response = invocationBuilder.post(Entity.entity(entity, MediaType.APPLICATION_JSON));
+
+		return response;
 	}
 
+	private void setErrResult(ObjectNode result, String message) {
+		logger.error(message);
+		result.put("code", 1);
+		result.put("message", message);
+	}
 }
