@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,13 +13,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ubot.db.dao.LogDao;
 import com.ubot.db.vo.Log;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-public class LogService extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@Path("/Log")
+public class LogService {
 	private final Logger logger;
 	private final ObjectMapper mapper;
 	private final LogDao logDao;
@@ -31,10 +32,12 @@ public class LogService extends HttpServlet {
 		this.logDao = new LogDao();
     }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @POST
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public Response save(String requestJson) throws IOException {
 		ObjectNode result = mapper.createObjectNode();
-		String json = request.getReader().lines().collect(Collectors.joining());
-		Log log = mapper.readValue(json, Log.class);
+		Log log = mapper.readValue(requestJson, Log.class);
 		String message = "";
 		try {
 			log.setCreateDatetime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS")));
@@ -50,9 +53,7 @@ public class LogService extends HttpServlet {
 			result.put("message", message);
 			result.put("code", 1);
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
 
 }
