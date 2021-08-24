@@ -1,59 +1,56 @@
 package com.ubot.api;
 
-import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.ubot.db.dao.LogDao;
-import com.ubot.db.vo.Log;
+import com.ubot.db.dao.WorkReferenceDao;
+import com.ubot.db.vo.WorkReference;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/Log")
-public class LogService {
+@Path("/WorkReference")
+public class WorkReferenceService {
+
 	private final Logger logger;
 	private final ObjectMapper mapper;
-	private final LogDao logDao;
-	
-    public LogService() {
+	private final WorkReferenceDao workReferenceDao;
+
+	public WorkReferenceService() {
 		this.logger = LogManager.getLogger(this.getClass());
 		this.mapper = new ObjectMapper();
-		this.logDao = new LogDao();
-    }
+		this.workReferenceDao = new WorkReferenceDao();
+	}
 
-    @POST
+	@GET
 	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
-	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
-	public Response save(String requestJson) throws IOException {
+	public Response search() throws JsonProcessingException {
 		ObjectNode result = mapper.createObjectNode();
-		Log log = mapper.readValue(requestJson, Log.class);
 		String message = "";
+
 		try {
-			log.setCreateDatetime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSS")));
-			logDao.insertQuery(log);
-			message = "新增log成功";
+			List<WorkReference> workReferenceList = workReferenceDao.selectQuery("select * from workreference");
+			message = "查詢部門別成功";
 			logger.info(message);
 			result.put("message", message);
 			result.put("code", 0);
+			result.putPOJO("data", workReferenceList);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			message = String.format("新增log失敗, 原因: %s", e.getMessage());
+			message = String.format("查詢部門別失敗, 原因: %s", e.getMessage());
 			logger.error(message);
 			result.put("message", message);
 			result.put("code", 1);
 		}
+
 		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
-
 }

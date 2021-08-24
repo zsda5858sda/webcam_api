@@ -1,4 +1,4 @@
-package com.ubot.db.dao;
+ package com.ubot.db.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,13 +48,12 @@ public class CustomerDao extends BaseDao {
 		stat.close();
 		resultSet.close();
 		conn.close();
-		logger.info("客戶資料查詢");
 		return result;
 	}
 
 	public void insertQuery(Customer customer) throws Exception {
 		Connection conn = getConnection();
-		String sql = "insert into vspcustomer(CUSTOMERID, CUSTOMERPHONE, TOKEN) values(?,?,?)";
+		String sql = "insert into customer(CUSTOMERID, CUSTOMERPHONE, TOKEN) values(?,?,?)";
 		PreparedStatement ps = conn.prepareStatement(sql);
 
 		ps.setString(1, customer.getCustomerId());
@@ -76,7 +75,7 @@ public class CustomerDao extends BaseDao {
 		if (customer.getCustomerId() != null) {
 			entity.setCustomerId(customer.getCustomerId());
 		}
-		String sql = "update vspcustomer set CUSTOMERID = ?, TOKEN = ? where CUSTOMERPHONE = ?";
+		String sql = "update customer set CUSTOMERID = ?, TOKEN = ? where CUSTOMERPHONE = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 
 		ps.setString(1, entity.getCustomerId());
@@ -92,10 +91,11 @@ public class CustomerDao extends BaseDao {
 	public Optional<Customer> findById(String id) throws Exception {
 		Connection conn = getConnection();
 		Customer customer = new Customer();
-		String sql = "select * from vspcustomer where CUSTOMERPHONE = ?";
+		String sql = "select * from customer where CUSTOMERPHONE = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, id);
-		
+
+		logger.info(ps.toString());
 		ResultSet resultSet = ps.executeQuery();
 		StringBuilder builder = new StringBuilder();
 		
@@ -117,7 +117,6 @@ public class CustomerDao extends BaseDao {
 		}
 		
 		System.out.println(builder.toString());
-		logger.info(ps.toString());
 		ps.close();
 		resultSet.close();
 		conn.close();

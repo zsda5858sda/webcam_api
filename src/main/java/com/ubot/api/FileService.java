@@ -1,7 +1,6 @@
 package com.ubot.api;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,13 +10,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ubot.db.dao.VSPFileDao;
 import com.ubot.db.vo.VSPFile;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-public class FileService extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@Path("/File")
+public class FileService {
 	private final VSPFileDao vspFileDao;
 	private final ObjectMapper mapper;
 	private final Logger logger;
@@ -28,21 +30,14 @@ public class FileService extends HttpServlet {
 		this.logger = LogManager.getLogger(this.getClass());
 	}
 
-	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if (request.getMethod().equalsIgnoreCase("PATCH")) {
-			doPatch(request, response);
-		} else {
-			super.service(request, response);
-		}
-	}
-
-	protected void doPatch(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@PATCH
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public Response update(String requestJson) throws IOException {
 		ObjectNode result = mapper.createObjectNode();
 		String message = "";
-		String json = request.getReader().lines().collect(Collectors.joining());
-		VSPFile vspFile = mapper.readValue(json, VSPFile.class);
-		logger.info(json);
+		VSPFile vspFile = mapper.readValue(requestJson, VSPFile.class);
+		logger.info(requestJson);
 		try {
 			vspFileDao.updateQuery(vspFile);
 			message = String.format("檔案更新成功");
@@ -54,20 +49,18 @@ public class FileService extends HttpServlet {
 			logger.error(message);
 			result.put("code", 1);
 			result.put("message", message);
-			e.printStackTrace();
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@POST
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public Response save(String requestJson) throws IOException {
 		ObjectNode result = mapper.createObjectNode();
-		String json = request.getReader().lines().collect(Collectors.joining());
 		String message = "";
-		logger.info(json);
-		VSPFile vspFile = mapper.readValue(json, VSPFile.class);
+		VSPFile vspFile = mapper.readValue(requestJson, VSPFile.class);
+		logger.info(requestJson);
 		try {
 			message = "檔案新增成功";
 			vspFileDao.insertQuery(vspFile);
@@ -79,11 +72,8 @@ public class FileService extends HttpServlet {
 			logger.error(message);
 			result.put("code", 1);
 			result.put("message", message);
-			e.printStackTrace();
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
 
 }

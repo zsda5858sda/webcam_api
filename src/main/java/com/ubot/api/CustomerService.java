@@ -2,7 +2,6 @@ package com.ubot.api;
 
 import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,13 +11,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ubot.db.dao.CustomerDao;
 import com.ubot.db.vo.Customer;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-public class CustomerService extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@Path("/Customer")
+public class CustomerService {
 	private final CustomerDao customerDao;
 	private final ObjectMapper mapper;
 	private final Logger logger;
@@ -29,21 +33,15 @@ public class CustomerService extends HttpServlet {
 		this.logger = LogManager.getLogger(this.getClass());
 	}
 
-	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if (request.getMethod().equalsIgnoreCase("PATCH")) {
-			doPatch(request, response);
-		} else {
-			super.service(request, response);
-		}
-	}
-
-	protected void doPatch(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@PATCH
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public Response update(String requestJson) throws IOException {
 		ObjectNode result = mapper.createObjectNode();
 		String message = "";
-		String json = request.getReader().lines().collect(Collectors.joining());
-		Customer customer = mapper.readValue(json, Customer.class);
-		logger.info(json);
+
+		Customer customer = mapper.readValue(requestJson, Customer.class);
+		logger.info(requestJson);
 		try {
 			customerDao.updateQuery(customer);
 			message = String.format("%s 客戶更新成功", customer.getCustomerPhone());
@@ -55,47 +53,42 @@ public class CustomerService extends HttpServlet {
 			logger.error(message);
 			result.put("code", 1);
 			result.put("message", message);
-			e.printStackTrace();
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@GET
+	@Path("/token")
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public Response getById(@QueryParam("customerPhone") String customerPhone) throws IOException {
 		ObjectNode result = mapper.createObjectNode();
-		String pathInfo = request.getPathInfo();
 		String message = "";
-		if (pathInfo.equalsIgnoreCase("/token")) {
-			try {
-				Customer customer = customerDao.findById(request.getParameter("customerPhone"))
-						.orElseThrow(() -> new Exception("此ID尚未註冊"));
 
-				message = "查詢客戶token成功";
-				logger.info(message);
-				result.put("data", customer.getToken());
-				result.put("code", 0);
-				result.put("message", message);
-			} catch (Exception e) {
-				e.printStackTrace();
-				message = String.format("查詢客戶token失敗, 原因: %s", e.getMessage());
-				logger.info(message);
-				result.put("code", 1);
-				result.put("message", message);
-			}
+		try {
+			Customer customer = customerDao.findById(customerPhone).orElseThrow(() -> new Exception("此ID尚未註冊"));
+
+			message = "查詢客戶token成功";
+			logger.info(message);
+			result.put("data", customer.getToken());
+			result.put("code", 0);
+			result.put("message", message);
+		} catch (Exception e) {
+			message = String.format("查詢客戶token失敗, 原因: %s", e.getMessage());
+			logger.info(message);
+			result.put("code", 1);
+			result.put("message", message);
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@POST
+	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
+	public Response save(String requestJson) throws IOException {
 		ObjectNode result = mapper.createObjectNode();
-		String json = request.getReader().lines().collect(Collectors.joining());
-		logger.info(json);
-		Customer customer = mapper.readValue(json, Customer.class);
+
+		Customer customer = mapper.readValue(requestJson, Customer.class);
+		logger.info(requestJson);
 		String message = "";
 		try {
 			try {
@@ -113,11 +106,7 @@ public class CustomerService extends HttpServlet {
 			logger.error(message);
 			result.put("code", 1);
 			result.put("message", message);
-			e.printStackTrace();
 		}
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().print(mapper.writeValueAsString(result));
+		return Response.status(200).entity(mapper.writeValueAsString(result)).build();
 	}
-
 }

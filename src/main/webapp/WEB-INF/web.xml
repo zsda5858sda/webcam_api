@@ -9,51 +9,11 @@
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
-  <servlet>
-    <description></description>
-    <display-name>HttpService</display-name>
-    <servlet-name>HttpService</servlet-name>
-    <servlet-class>com.ubot.api.HttpService</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>HttpService</servlet-name>
-    <url-pattern>/getAD</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>FileService</display-name>
-    <servlet-name>FileService</servlet-name>
-    <servlet-class>com.ubot.api.FileService</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>FileService</servlet-name>
-    <url-pattern>/File</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>CustomerService</display-name>
-    <servlet-name>CustomerService</servlet-name>
-    <servlet-class>com.ubot.api.CustomerService</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>CustomerService</servlet-name>
-    <url-pattern>/Customer/*</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <description></description>
-    <display-name>LogService</display-name>
-    <servlet-name>LogService</servlet-name>
-    <servlet-class>com.ubot.api.LogService</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>LogService</servlet-name>
-    <url-pattern>/Log</url-pattern>
-  </servlet-mapping>
   <context-param>
-        <param-name>CONTEXTINIT</param-name>
-        <param-value>/contextInit</param-value>
+    <param-name>CONTEXTINIT</param-name>
+    <param-value>/contextInit</param-value>
   </context-param>
   <listener>
-	  <listener-class>com.ubot.api.ContextInitListener</listener-class>
+    <listener-class>com.ubot.api.ContextInitListener</listener-class>
   </listener>
 </web-app>
