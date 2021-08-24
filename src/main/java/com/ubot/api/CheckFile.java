@@ -36,65 +36,81 @@ public class CheckFile extends Thread {
 				String zipName = "/home/petersha/zipFile/";
 				List filePaths = new ArrayList();
 				Files.list(new File(dirName).toPath()).forEach(path -> {
-					filePaths.add(path);	  //走訪uploadFile資料夾並將裡面的檔案存放到arrayList
+					filePaths.add(path); // 走訪uploadFile資料夾並將裡面的檔案存放到arrayList
 				});
-				for (int i1 = 1; i1 < filePaths.size(); i1++) {    //取出arrarList裡的檔案並逐一檢查是否到達上傳標準
+				for (int i1 = 1; i1 < filePaths.size(); i1++) { // 取出arrarList裡的檔案並逐一檢查是否到達上傳標準
 					String webcamFolderName = filePaths.get(i1).toString();
 					List fileCount = new ArrayList();
 					Files.list(new File(webcamFolderName).toPath()).forEach(path -> {
-						fileCount.add(path);  
+						fileCount.add(path);
 					});
 					if (fileCount.size() >= 8) {
-						String newFileName = webcamFolderName.split("uploadFile/")[1];
-						Path sourceFolderPath = Paths.get(webcamFolderName);
-						Path zipPath = Paths.get(zipName + newFileName + ".zip");
-						System.out.println(webcamFolderName + "可以上傳摟");
-						ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath.toFile()));
-						Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<Path>() { //將要上傳的資料夾壓縮
-							public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-								zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(file).toString()));
-								Files.copy(file, zos);
-								zos.closeEntry();
-								return FileVisitResult.CONTINUE;
+						Boolean canUpload = true;
+						for (int i = 0; i < fileCount.size(); i++) {
+							File f = new File(fileCount.toArray()[i].toString());
+							long fileSize = f.length();
+							if (fileSize == 0) {
+								canUpload = false;
 							}
-						});
-						zos.close();
-						File uploadFile = new File(zipName + newFileName + ".zip");
-						FileInputStream input = new FileInputStream(uploadFile);
-						byte[] content = null;
-						try {
-							content = Files.readAllBytes(zipPath);
-						} catch (final IOException e) {
 						}
-						ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
-						Future future = executor.submit(new ClientThreadCode(uploadFile));
-						executor.schedule(new Runnable() {
-							public void run() {
-								future.cancel(true);
-								System.out.println("上傳終止");
+						if (canUpload) {
+							String newFileName = webcamFolderName.split("uploadFile/")[1];
+							Path sourceFolderPath = Paths.get(webcamFolderName);
+							Path zipPath = Paths.get(zipName + newFileName + ".zip");
+							System.out.println(webcamFolderName + "可以上傳摟");
+							ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipPath.toFile()));
+							Files.walkFileTree(sourceFolderPath, new SimpleFileVisitor<Path>() { // 將要上傳的資料夾壓縮
+								public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+										throws IOException {
+									zos.putNextEntry(new ZipEntry(sourceFolderPath.relativize(file).toString()));
+									Files.copy(file, zos);
+									zos.closeEntry();
+									return FileVisitResult.CONTINUE;
+								}
+							});
+							zos.close();
+							File uploadFile = new File(zipName + newFileName + ".zip");
+							FileInputStream input = new FileInputStream(uploadFile);
+							byte[] content = null;
+							try {
+								content = Files.readAllBytes(zipPath);
+							} catch (final IOException e) {
 							}
-						}, 30000, TimeUnit.MILLISECONDS); // 設置上傳時數限制，若超出則強致中斷
-						executor.shutdown();
-						new CheckFile().join();
-						File folderToBeDelete = new File(webcamFolderName); 
-						File zipToBeDelete = new File("/home/petersha/zipFile");// file to be delete
-						String[] entries = folderToBeDelete.list();
-						for (String s : entries) {
-							File currentFile = new File(folderToBeDelete.getPath(), s);
-							currentFile.delete(); // 開始刪除檔案
-						}
-						try {
-							if (folderToBeDelete.delete() && zipToBeDelete.delete()) // returns Boolean value
-							{
-								System.out.println(folderToBeDelete.getName() + " deleted"); // getting and printing the file name
-								System.out.println(zipToBeDelete.getName() + " deleted"); // getting and printing the file name
-							} else {
-								System.out.println("failed");
+							ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+							Future future = executor.submit(new ClientThreadCode(uploadFile));
+							executor.schedule(new Runnable() {
+								public void run() {
+									future.cancel(true);
+									System.out.println("上傳終止");
+								}
+							}, 30000, TimeUnit.MILLISECONDS); // 設置上傳時數限制，若超出則強致中斷
+							executor.shutdown();
+							new CheckFile().join();
+							File folderToBeDelete = new File(webcamFolderName);
+							File zipToBeDelete = new File("/home/petersha/zipFile");// file to be delete
+							String[] entries = folderToBeDelete.list();
+							for (String s : entries) {
+								File currentFile = new File(folderToBeDelete.getPath(), s);
+								currentFile.delete(); // 開始刪除檔案
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
+							try {
+								if (folderToBeDelete.delete() && zipToBeDelete.delete()) // returns Boolean value
+								{
+									System.out.println(folderToBeDelete.getName() + " deleted"); // getting and printing
+																									// the
+																									// file name
+									System.out.println(zipToBeDelete.getName() + " deleted"); // getting and printing
+																								// the
+																								// file name
+								} else {
+									System.out.println("failed");
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						} else {
+							System.out.println("有檔案為空擋，不能上傳");
 						}
-
 					} else {
 						File myfile = new File(webcamFolderName);
 						Path path = myfile.toPath();
@@ -102,7 +118,7 @@ public class CheckFile extends Thread {
 						Clock clock = Clock.systemUTC();
 						Instant instant = clock.instant();
 						long duration = ChronoUnit.MINUTES.between(fatr.lastModifiedTime().toInstant(), instant);
-						if (duration > 300) {
+						if (duration > 720) {
 							String[] entries = myfile.list();
 							for (String s : entries) {
 								File currentFile = new File(myfile.getPath(), s);
