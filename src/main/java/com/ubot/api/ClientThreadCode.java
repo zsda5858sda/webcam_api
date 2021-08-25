@@ -49,8 +49,12 @@ public class ClientThreadCode extends Thread {
 			fis = null;
 			dos = null;
 			s.close();
-			s = null;
-		} catch (Exception e) {
+			if(s.isClosed()) {
+				System.out.println("socket has been closed");
+			} else {
+				System.out.println("socket haven't been closed yet");
+			}
+		}catch (Exception e) {
 			System.out.println("Error occur :" + e);
 		}
 	}

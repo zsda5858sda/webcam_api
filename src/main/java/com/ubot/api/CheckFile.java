@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,13 +32,13 @@ public class CheckFile extends Thread {
 			while (true) {
 				String dirName = "/home/petersha/uploadFile";
 				String zipName = "/home/petersha/zipFile/";
-				List filePaths = new ArrayList();
+				List<Path> filePaths = new ArrayList<Path>();
 				Files.list(new File(dirName).toPath()).forEach(path -> {
 					filePaths.add(path); // 走訪uploadFile資料夾並將裡面的檔案存放到arrayList
 				});
 				for (int i1 = 1; i1 < filePaths.size(); i1++) { // 取出arrarList裡的檔案並逐一檢查是否到達上傳標準
 					String webcamFolderName = filePaths.get(i1).toString();
-					List fileCount = new ArrayList();
+					List<Path> fileCount = new ArrayList<Path>();
 					Files.list(new File(webcamFolderName).toPath()).forEach(path -> {
 						fileCount.add(path);
 					});
@@ -87,7 +85,7 @@ public class CheckFile extends Thread {
 							executor.shutdown();
 							new CheckFile().join();
 							File folderToBeDelete = new File(webcamFolderName);
-							File zipToBeDelete = new File("/home/petersha/zipFile");// file to be delete
+							File zipToBeDelete = new File("/Users/yangzhelun/Desktop/zipFile");// file to be delete
 							String[] entries = folderToBeDelete.list();
 							for (String s : entries) {
 								File currentFile = new File(folderToBeDelete.getPath(), s);
@@ -97,11 +95,7 @@ public class CheckFile extends Thread {
 								if (folderToBeDelete.delete() && zipToBeDelete.delete()) // returns Boolean value
 								{
 									System.out.println(folderToBeDelete.getName() + " deleted"); // getting and printing
-																									// the
-																									// file name
 									System.out.println(zipToBeDelete.getName() + " deleted"); // getting and printing
-																								// the
-																								// file name
 								} else {
 									System.out.println("failed");
 								}
@@ -128,7 +122,6 @@ public class CheckFile extends Thread {
 								if (myfile.delete()) // returns Boolean value
 								{
 									System.out.println(myfile.getName() + " deleted"); // getting and printing the file
-																						// name
 								} else {
 									System.out.println("failed");
 								}
