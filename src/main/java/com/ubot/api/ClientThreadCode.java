@@ -9,9 +9,9 @@ import java.time.format.DateTimeFormatter;
 
 public class ClientThreadCode extends Thread {
 	File clientFile;
-	private FileInputStream fis;
-	private DataOutputStream dos;
-
+	private FileInputStream fis = null;
+	private DataOutputStream dos = null;
+	private Socket s = null;
 	public ClientThreadCode(File file) {
 		clientFile = file;
 	}
@@ -20,7 +20,7 @@ public class ClientThreadCode extends Thread {
 	public void run() {
 		try {
 			System.out.println("upload started");
-			Socket s = new Socket("172.16.45.245", 5050);
+			s = new Socket("172.16.45.245", 5050);
 			if (clientFile.exists()) {
 				fis = new FileInputStream(clientFile);
 				dos = new DataOutputStream(s.getOutputStream());
@@ -46,8 +46,6 @@ public class ClientThreadCode extends Thread {
 			clientFile.delete();
 			fis.close();
 			dos.close();
-			fis = null;
-			dos = null;
 			s.close();
 			if(s.isClosed()) {
 				System.out.println("socket has been closed");
@@ -56,7 +54,7 @@ public class ClientThreadCode extends Thread {
 			}
 		}catch (Exception e) {
 			System.out.println("Error occur :" + e);
-		}
+		} 
 	}
 
 }

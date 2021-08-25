@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -32,16 +33,16 @@ public class CheckFile extends Thread {
 			while (true) {
 				String dirName = "/home/petersha/uploadFile";
 				String zipName = "/home/petersha/zipFile/";
-				List<Path> filePaths = new ArrayList<Path>();
-				Files.list(new File(dirName).toPath()).forEach(path -> {
-					filePaths.add(path); // 走訪uploadFile資料夾並將裡面的檔案存放到arrayList
-				});
+				List<String> filePaths = new ArrayList<String>();
+				try (Stream<Path> stream = Files.list(new File(dirName).toPath())) {
+			        stream.map(p -> p.toAbsolutePath().toString()).sequential().forEach(filePaths::add);
+			    }
 				for (int i1 = 1; i1 < filePaths.size(); i1++) { // 取出arrarList裡的檔案並逐一檢查是否到達上傳標準
-					String webcamFolderName = filePaths.get(i1).toString();
-					List<Path> fileCount = new ArrayList<Path>();
-					Files.list(new File(webcamFolderName).toPath()).forEach(path -> {
-						fileCount.add(path);
-					});
+					String webcamFolderName = filePaths.get(i1);
+					List<String> fileCount = new ArrayList<String>();
+					try (Stream<Path> stream = Files.list(new File(webcamFolderName).toPath())) {
+				        stream.map(p -> p.toAbsolutePath().toString()).sequential().forEach(fileCount::add);
+				    }
 					if (fileCount.size() >= 8) {
 						Boolean canUpload = true;
 						for (int i = 0; i < fileCount.size(); i++) {
