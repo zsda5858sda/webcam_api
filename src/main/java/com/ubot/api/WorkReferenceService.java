@@ -1,6 +1,5 @@
 package com.ubot.api;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +43,7 @@ public class WorkReferenceService {
 			result.put("message", message);
 			result.put("code", 0);
 			result.putPOJO("data", workReferenceList);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			message = String.format("查詢部門別失敗, 原因: %s", e.getMessage());
 			logger.error(message);
 			result.put("message", message);

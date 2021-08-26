@@ -1,7 +1,6 @@
 package com.ubot.api;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -25,14 +24,14 @@ public class LogService {
 	private final Logger logger;
 	private final ObjectMapper mapper;
 	private final LogDao logDao;
-	
-    public LogService() {
+
+	public LogService() {
 		this.logger = LogManager.getLogger(this.getClass());
 		this.mapper = new ObjectMapper();
 		this.logDao = new LogDao();
-    }
+	}
 
-    @POST
+	@POST
 	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
 	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
 	public Response save(String requestJson) throws IOException {
@@ -46,7 +45,7 @@ public class LogService {
 			logger.info(message);
 			result.put("message", message);
 			result.put("code", 0);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			message = String.format("新增log失敗, 原因: %s", e.getMessage());
 			logger.error(message);
