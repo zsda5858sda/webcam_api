@@ -40,10 +40,10 @@ public class ClientThreadCode extends Thread {
 				}
 				System.out.println();
 				System.out.println("======== 檔案傳輸成功 ========");
+				clientFile.delete();
 			} else {
 				System.out.println("file not exists");
 			}
-			clientFile.delete();
 			fis.close();
 			dos.close();
 			s.close();
