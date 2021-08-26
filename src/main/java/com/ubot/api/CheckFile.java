@@ -38,12 +38,11 @@ public class CheckFile extends Thread {
 					stream.map(p -> p.toAbsolutePath().toString()).sequential().forEach(filePaths::add);
 				}
 				if (filePaths.size() != 0) {
+					System.out.println("現在待處理的資料夾數量為："+filePaths.size());
 					for (int i1 = 1; i1 < filePaths.size(); i1++) { // 取出arrarList裡的檔案並逐一檢查是否到達上傳標準
 						String webcamFolderName = filePaths.get(i1);
 						File isF = new File(webcamFolderName);
-						System.out.println("這是資料夾名稱"+webcamFolderName);
 						if (isF.isDirectory()) {
-							System.out.println("是資料夾");
 							List<String> fileCount = new ArrayList<String>();
 							try (Stream<Path> stream = Files.list(new File(webcamFolderName).toPath())) {
 								stream.map(p -> p.toAbsolutePath().toString()).sequential().forEach(fileCount::add);
@@ -120,7 +119,8 @@ public class CheckFile extends Thread {
 									System.out.println("有檔案為空擋，不能上傳");
 								}
 							} else {
-								System.out.println("檔案數量到齊");
+								System.out.println("檔案數量尚未到齊");
+								System.out.println(fileCount.size());
 								File myfile = new File(webcamFolderName);
 								Path path = myfile.toPath();
 								BasicFileAttributes fatr = Files.readAttributes(path, BasicFileAttributes.class);
