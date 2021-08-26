@@ -39,12 +39,16 @@ public class UploadTxtServelet extends HttpServlet {
 		/* Receive file uploaded to the Servlet from the HTML5 form */
 		ObjectNode result = mapper.createObjectNode();
 		String fileName = request.getParameter("fileName");
-		request.setAttribute("fileName", fileName);
+		if (fileName != null) {
+			request.setAttribute("fileName", fileName);
+		}
 		String content = request.getParameter("content");
-		request.setAttribute("content", content); // 設定請求屬性
+		if (content != null) {
+			request.setAttribute("content", content); // 設定請求屬性
+		}
 		String test = fileName.split("-")[3];
 		System.out.println(test);
-		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-"+fileName.split("-")[2];
+		String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[2];
 		Path folderPath = Paths.get("/home/petersha/uploadFile/" + folderName);
 		File file = new File("/home/petersha/uploadFile");
 		boolean exists = file.exists();
@@ -69,19 +73,20 @@ public class UploadTxtServelet extends HttpServlet {
 		String name = "/home/petersha/uploadFile/" + folderName;
 		List fileCount = new ArrayList();
 		Files.list(new File(name).toPath()).forEach(path -> {
-			if(path.toString().endsWith("webm")) {
+			if (path.toString().endsWith("webm")) {
 				File deleteFile = new File(path.toString());
 				deleteFile.delete();
 			}
 		});
-		
+
 		String finalFileName = "";
-		if(fileName.endsWith("webm")) {
-			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3]+"-"+fileName.split("-")[4];
+		if (fileName.endsWith("webm")) {
+			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3] + "-"
+					+ fileName.split("-")[4];
 		} else {
-			finalFileName = fileName.split("-")[0]+"-"+fileName.split("-")[1]+"-"+fileName.split("-")[3];
+			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3];
 		}
-		
+
 		File myObj = new File(folderPath + "/" + finalFileName);
 
 		if (myObj.createNewFile()) {
@@ -110,6 +115,7 @@ public class UploadTxtServelet extends HttpServlet {
 		}
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Strict-Transport-Security", "max-age=7776000; includeSubdomains");
 		response.getWriter().print(mapper.writeValueAsString(result));
 	}
 

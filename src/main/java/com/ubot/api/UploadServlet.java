@@ -107,6 +107,7 @@ public class UploadServlet extends HttpServlet {
 		}
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Strict-Transport-Security", "max-age=7776000; includeSubdomains");
 		response.getWriter().print(mapper.writeValueAsString(result));
 	}
 
