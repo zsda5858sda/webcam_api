@@ -2,7 +2,6 @@ package com.ubot.db.dao;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import com.ubot.db.vo.WorkReference;
 public class WorkReferenceDao extends BaseDao {
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
-	public List<WorkReference> selectQuery(String sql) throws SQLException {
+	public List<WorkReference> selectQuery(String sql) throws Exception {
 		List<WorkReference> result = new ArrayList<WorkReference>();
 		Connection conn = getConnection();
 		Statement stat = conn.createStatement();
