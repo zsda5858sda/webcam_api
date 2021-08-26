@@ -16,4 +16,22 @@
   <listener>
     <listener-class>com.ubot.api.ContextInitListener</listener-class>
   </listener>
+  <filter>
+    <display-name>FileFilter</display-name>
+    <filter-name>FileFilter</filter-name>
+    <filter-class>com.ubot.utils.FileFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>FileFilter</filter-name>
+    <url-pattern>/uploadTxt</url-pattern>
+  </filter-mapping>
+  <filter>
+    <display-name>PicFilter</display-name>
+    <filter-name>PicFilter</filter-name>
+    <filter-class>com.ubot.utils.PicFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>PicFilter</filter-name>
+    <url-pattern>/fileuploadservlet</url-pattern>
+  </filter-mapping>
 </web-app>
