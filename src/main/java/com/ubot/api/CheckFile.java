@@ -39,7 +39,7 @@ public class CheckFile extends Thread {
 				}
 				if (filePaths.size() != 0) {
 					System.out.println("現在待處理的資料夾數量為："+filePaths.size());
-					for (int i1 = 1; i1 < filePaths.size(); i1++) { // 取出arrarList裡的檔案並逐一檢查是否到達上傳標準
+					for (int i1 = 0; i1 < filePaths.size(); i1++) { // 取出arrarList裡的檔案並逐一檢查是否到達上傳標準
 						String webcamFolderName = filePaths.get(i1);
 						File isF = new File(webcamFolderName);
 						if (isF.isDirectory()) {
@@ -152,7 +152,7 @@ public class CheckFile extends Thread {
 							}
 							fileCount.clear();
 						} else {
-							System.out.println("不是資料夾");
+							System.out.println(isF.getName()+"不是資料夾");
 						}
 
 					}
