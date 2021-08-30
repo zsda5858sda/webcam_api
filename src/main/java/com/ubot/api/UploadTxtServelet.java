@@ -20,7 +20,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-
 @Path("/uploadTxt")
 public class UploadTxtServelet {
 	private final ObjectMapper mapper;
@@ -30,7 +29,7 @@ public class UploadTxtServelet {
 		this.logger = LogManager.getLogger(this.getClass());
 		this.mapper = new ObjectMapper();
 	}
-	
+
 	@POST
 	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
 	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
@@ -38,7 +37,7 @@ public class UploadTxtServelet {
 		ObjectNode result = mapper.createObjectNode();
 		String message = "";
 		try {
-			TextFile textFile = mapper.readValue(requestJson , TextFile.class);
+			TextFile textFile = mapper.readValue(requestJson, TextFile.class);
 			String fileName = textFile.getFileName();
 			String content = textFile.getContent();
 			String folderName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[2];
@@ -55,21 +54,24 @@ public class UploadTxtServelet {
 				System.out.println("Readable: " + file.canRead());
 				System.out.println("Writable: " + file.canWrite());
 			}
-			
+
 			try {
 				Files.createDirectory(folderPath); // 創建對保資料夾
 			} catch (IOException e) {
 				System.out.println(e);
 			}
-			
-			String name = "/home/petersha/uploadFile/" + folderName;
-			Files.list(new File(name).toPath()).forEach(path -> {
-				if (path.toString().endsWith("webm")) {
-					File deleteFile = new File(path.toString());
-					deleteFile.delete();
-				}
-			});
-			
+
+			String name = "/home/petersha/uploadFile/";
+			File customerFile = new File(name, folderName);
+			if (customerFile.getCanonicalPath().startsWith(name)) {
+				Files.list(customerFile.toPath()).forEach(path -> {
+					if (path.toString().endsWith("webm")) {
+						File deleteFile = new File(path.toString());
+						deleteFile.delete();
+					}
+				});
+			}
+
 			File myObj = new File(folderPath + "/" + fileName);
 
 			if (myObj.createNewFile()) {
