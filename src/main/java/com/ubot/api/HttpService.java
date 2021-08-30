@@ -13,11 +13,9 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ubot.db.vo.EaiVO;
 
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -41,26 +39,15 @@ public class HttpService {
 		this.logger = LogManager.getLogger(this.getClass());
 	}
 
-	@GET
-	@Produces("application/json")
-	public String hello() {
-		return "{\"result\": \"helloworld\"}";
-	}
-
 	@POST
 	@Path("/getAD")
 	@Produces(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
 	@Consumes(MediaType.APPLICATION_JSON + " ;charset=UTF-8")
 	public void getAD(@Suspended final AsyncResponse asyncResponse, String requestJson)
 			throws JsonMappingException, JsonProcessingException {
-		ObjectNode result = mapper.createObjectNode();
-
 		EaiVO eaiVO = mapper.readValue(requestJson, EaiVO.class);
 		logger.info(requestJson);
 
-		String message = "%s AD驗證登入成功";
-		String errMessage = "";
-		StringBuffer errMessageBuffer = new StringBuffer("AD驗證登入失敗, 原因: ");
 		long startTime = System.currentTimeMillis();
 		final long endTime = startTime + 50000;
 		Timer timer = new Timer();
@@ -72,34 +59,44 @@ public class HttpService {
 				String errMessage = "AD驗證登入失敗, 原因: 連線超時";
 				json.put("message", errMessage);
 				json.put("code", "1");
-				asyncResponse.resume(Response.status(200).entity(json.toString()).build());
-				timer.cancel();
+				asyncResponse.resume(Response.status(408).entity(json.toString()).build());
 			}
 		}, new Date(endTime));
-		Response clientResponse = sendToAdHub(eaiVO);
 
-		if (clientResponse.getStatus() == 200) {
-			String responseString = clientResponse.readEntity(String.class);
-			JSONObject jsonResult = new JSONObject(responseString);
-			String rc2 = jsonResult.getString("rc2");
-			message = String.format(message,
-					jsonResult.getJSONObject("result").getJSONObject("data").getString("loginID"));
-			if (rc2.equals("M000")) {
-				logger.info(message);
-				result.put("message", message);
-				result.put("code", "0");
-			} else {
-				errMessage = errMessageBuffer.append(String.format("%s", jsonResult.get("msg2"))).toString();
-				setErrResult(result, errMessage);
+		Thread sendAdThread = new Thread() {
+			public void run() {
+				String message = "%s AD驗證登入成功";
+				String errMessage = "";
+				StringBuffer errMessageBuffer = new StringBuffer("AD驗證登入失敗, 原因: ");
+				JSONObject result = new JSONObject();
+				Response clientResponse = sendToAdHub(eaiVO);
+
+				if (clientResponse.getStatus() == 200) {
+					String responseString = clientResponse.readEntity(String.class);
+					JSONObject jsonResult = new JSONObject(responseString);
+					String rc2 = jsonResult.getString("rc2");
+					message = String.format(message,
+							jsonResult.getJSONObject("result").getJSONObject("data").getString("loginID"));
+					if (rc2.equals("M000")) {
+						logger.info(message);
+						result.put("message", message);
+						result.put("code", "0");
+					} else {
+						errMessage = errMessageBuffer.append(String.format("%s", jsonResult.get("msg2"))).toString();
+						setErrResult(result, errMessage);
+					}
+
+				} else {
+					errMessage = errMessageBuffer
+							.append(String.format("http status code %d", clientResponse.getStatus())).toString();
+					setErrResult(result, errMessage);
+				}
+				asyncResponse.resume(Response.status(200).entity(result.toString()).build());
 			}
+		};
 
-		} else {
-			errMessage = errMessageBuffer.append(String.format("http status code %d", clientResponse.getStatus()))
-					.toString();
-			setErrResult(result, errMessage);
-		}
-		asyncResponse.resume(Response.status(200).entity(mapper.writeValueAsString(result)).build());
-		timer.cancel();
+		sendAdThread.start();
+
 	}
 
 	// 發送至AD之設定
@@ -119,7 +116,7 @@ public class HttpService {
 		return response;
 	}
 
-	private void setErrResult(ObjectNode result, String message) {
+	private void setErrResult(JSONObject result, String message) {
 		logger.error(message);
 		result.put("code", 1);
 		result.put("message", message);
