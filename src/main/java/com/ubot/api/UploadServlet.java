@@ -7,8 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -107,7 +105,7 @@ public class UploadServlet extends HttpServlet {
 		}
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Strict-Transport-Security", "max-age=7776000; includeSubdomains");
+		response.addHeader("Strict-Transport-Security", "max-age=7776000; includeSubdomains");
 		response.getWriter().print(mapper.writeValueAsString(result));
 	}
 
