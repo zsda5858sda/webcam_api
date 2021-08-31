@@ -20,10 +20,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
 @WebServlet(name = "FileUploadServlet", urlPatterns = { "/fileuploadservlet" })
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
-		maxFileSize = 1024 * 1024 * 1024, // 1 GB
-		maxRequestSize = 1024 * 1024 * 1024 // 1 GB
-)
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1)
 public class UploadServlet extends HttpServlet {
 	private final ObjectMapper mapper;
 	private final Logger logger;
