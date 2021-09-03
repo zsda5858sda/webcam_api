@@ -1,4 +1,4 @@
-package com.ubot.utils;
+package com.ubot.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -16,6 +16,7 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.ext.Provider;
 
+// 過濾跨網站指令碼
 @Provider
 @PreMatching
 public class XSSFilter implements ContainerRequestFilter {
