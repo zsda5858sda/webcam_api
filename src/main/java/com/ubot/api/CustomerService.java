@@ -21,6 +21,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+// 接收有關Customer的所有請求
 @Path("/Customer")
 public class CustomerService {
 	private final CustomerDao customerDao;

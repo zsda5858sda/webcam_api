@@ -1,5 +1,6 @@
 package com.ubot.db.vo;
 
+//客戶資料，對應customer表
 public class Customer {
 	private String customerId;
 	private String customerPhone;

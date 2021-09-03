@@ -1,5 +1,6 @@
 package com.ubot.db.vo;
 
+//紀錄app之log，對應log表
 public class Log {
 	private String userId;
 	private String userType;

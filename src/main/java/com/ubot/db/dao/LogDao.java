@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 
 import com.ubot.db.vo.Log;
 
+//紀錄app之log，對應log表
 public class LogDao extends BaseDao {
 
 	public void insertQuery(Log log) throws Exception {

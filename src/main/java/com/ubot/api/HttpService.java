@@ -29,6 +29,7 @@ import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+//接收打到AD驗證之請求
 @Path("")
 public class HttpService {
 	private final ObjectMapper mapper;
@@ -52,6 +53,7 @@ public class HttpService {
 		final long endTime = startTime + 50000;
 		Timer timer = new Timer();
 
+		// 設定連線timeout
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -75,20 +77,22 @@ public class HttpService {
 					String responseString = clientResponse.readEntity(String.class);
 					JSONObject jsonResult = new JSONObject(responseString);
 					String rc2 = jsonResult.getString("rc2");
-					message = String.format(message,
-							jsonResult.getJSONObject("result").getJSONObject("data").getString("loginID"));
+					logger.info(responseString);
 					if (rc2.equals("M000")) {
+						message = String.format(message,
+								jsonResult.getJSONObject("result").getJSONObject("data").getString("loginID"));
 						logger.info(message);
 						result.put("message", message);
 						result.put("code", "0");
 					} else {
-						errMessage = errMessageBuffer.append(String.format("%s", jsonResult.get("msg2"))).toString();
+						errMessage = errMessageBuffer.append(jsonResult.get("msg2")).toString();
+						logger.error(errMessage);
 						setErrResult(result, errMessage);
 					}
-
 				} else {
 					errMessage = errMessageBuffer
 							.append(String.format("http status code %d", clientResponse.getStatus())).toString();
+					logger.error(errMessage);
 					setErrResult(result, errMessage);
 				}
 				asyncResponse.resume(Response.status(200).entity(result.toString()).build());
