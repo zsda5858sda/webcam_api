@@ -61,17 +61,6 @@ public class UploadTxtServelet {
 				System.out.println(e);
 			}
 
-			String name = "/home/petersha/uploadFile/";
-			File customerFile = new File(name, folderName);
-			if (customerFile.getCanonicalPath().startsWith(name)) {
-				Files.list(customerFile.toPath()).forEach(path -> {
-					if (path.toString().endsWith("webm")) {
-						File deleteFile = new File(path.toString());
-						deleteFile.delete();
-					}
-				});
-			}
-
 			File myObj = new File(folderPath + "/" + fileName);
 
 			if (myObj.createNewFile()) {

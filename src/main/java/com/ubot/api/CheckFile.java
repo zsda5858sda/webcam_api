@@ -48,7 +48,8 @@ public class CheckFile extends Thread {
 								stream.map(p -> p.toAbsolutePath().toString()).sequential().forEach(fileCount::add);
 							}
 							if (fileCount.size() >= 8) {
-								Boolean canUpload = true;
+								Boolean canUpload = false;
+								int count = 0;
 								for (int i = 0; i < fileCount.size(); i++) {
 									File f = new File(fileCount.toArray()[i].toString());
 									long fileSize = f.length();
@@ -57,6 +58,13 @@ public class CheckFile extends Thread {
 										canUpload = false;
 										System.out.println("發現" + fileCount.get(i) + "的大小為0");
 									}
+									if(fileCount.get(i).contains("customerFileCount") || fileCount.get(i).contains("agentFileCount")) {
+										count++;
+									}
+								}
+								if(count >= 2) {
+									canUpload = true;
+//									System.out.println("檔案數量符合規定");
 								}
 								if (canUpload) {
 									System.out.println(webcamFolderName + "可以上傳摟");

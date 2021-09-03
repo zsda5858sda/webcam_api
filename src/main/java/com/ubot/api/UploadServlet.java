@@ -58,16 +58,32 @@ public class UploadServlet extends HttpServlet {
 		} catch (FileAlreadyExistsException e) {
 			System.out.println(e);
 		}
+
+		String name = "/home/petersha/uploadFile/";
+		File customerFile = new File(name, folderName);
+		if (customerFile.getCanonicalPath().startsWith(name) && fileName.endsWith(".jpg")) {
+			Files.list(customerFile.toPath()).forEach(path -> {
+				if (path.toString().endsWith("webm") || path.toString().contains("FileCount") || path.toString().endsWith("mp4")) {
+					File deleteFile = new File(path.toString());
+					deleteFile.delete();
+				}
+			});
+		}
+
 		String finalFileName = "";
-		if (fileName.endsWith("webm") && fileName.split("-").length == 6) {
-			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3] + "-"
-					+ fileName.split("-")[4] + "-" + fileName.split("-")[5];
-		} else if (fileName.endsWith("webm") && fileName.split("-").length == 5) {
-			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3] + "-"
-					+ fileName.split("-")[4];
+		System.out.println("the recieve fileName is " + fileName);
+		if (fileName.endsWith("webm") || fileName.endsWith("mp4")) {
+			if (fileName.split("-").length == 7) {
+				finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3]
+						+ "-" + fileName.split("-")[4] + "-" + fileName.split("-")[5] + "-" + fileName.split("-")[6];
+			} else if (fileName.split("-").length == 6) {
+				finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3]
+						+ "-" + fileName.split("-")[4] + "-" + fileName.split("-")[5];
+			}
 		} else {
 			finalFileName = fileName.split("-")[0] + "-" + fileName.split("-")[1] + "-" + fileName.split("-")[3];
 		}
+
 
 		File myObj = new File(folderPath + "/" + finalFileName);
 
