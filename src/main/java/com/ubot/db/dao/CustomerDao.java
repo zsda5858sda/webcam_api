@@ -1,4 +1,4 @@
- package com.ubot.db.dao;
+package com.ubot.db.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.ubot.db.vo.Customer;
 
+//有關對customer表的CRUD
 public class CustomerDao extends BaseDao {
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -22,7 +23,7 @@ public class CustomerDao extends BaseDao {
 		Statement stat = conn.createStatement();
 		ResultSet resultSet = stat.executeQuery(sql);
 		StringBuilder builder = new StringBuilder();
-		
+
 		while (resultSet.next()) {
 			Customer customer = new Customer();
 
@@ -43,8 +44,8 @@ public class CustomerDao extends BaseDao {
 
 			result.add(customer);
 		}
-		
-		System.out.println(builder.toString());
+
+		logger.info(builder.toString());
 		stat.close();
 		resultSet.close();
 		conn.close();
@@ -98,7 +99,7 @@ public class CustomerDao extends BaseDao {
 		logger.info(ps.toString());
 		ResultSet resultSet = ps.executeQuery();
 		StringBuilder builder = new StringBuilder();
-		
+
 		while (resultSet.next()) {
 			String customerId = resultSet.getString("CUSTOMERID");
 			String customerPhone = resultSet.getString("CUSTOMERPHONE");
@@ -115,8 +116,8 @@ public class CustomerDao extends BaseDao {
 			builder.append("  |  ");
 			builder.append(token);
 		}
-		
-		System.out.println(builder.toString());
+
+		logger.info(builder.toString());
 		ps.close();
 		resultSet.close();
 		conn.close();

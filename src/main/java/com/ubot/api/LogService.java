@@ -19,6 +19,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+// 接收有關Log的所有請求
 @Path("/Log")
 public class LogService {
 	private final Logger logger;

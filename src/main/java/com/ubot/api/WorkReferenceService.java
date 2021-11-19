@@ -17,6 +17,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+//接收有關WorkReference的所有請求
 @Path("/WorkReference")
 public class WorkReferenceService {
 
@@ -38,13 +39,13 @@ public class WorkReferenceService {
 
 		try {
 			List<WorkReference> workReferenceList = workReferenceDao.selectQuery("select * from workreference");
-			message = "查詢部門別成功";
+			message = "查詢業務種類成功";
 			logger.info(message);
 			result.put("message", message);
 			result.put("code", 0);
 			result.putPOJO("data", workReferenceList);
 		} catch (Exception e) {
-			message = String.format("查詢部門別失敗, 原因: %s", e.getMessage());
+			message = String.format("查詢業務種類失敗, 原因: %s", e.getMessage());
 			logger.error(message);
 			result.put("message", message);
 			result.put("code", 1);
